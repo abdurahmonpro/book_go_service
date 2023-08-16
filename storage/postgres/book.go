@@ -4,8 +4,10 @@ import (
 	"book/genproto/book_service"
 	"book/models"
 	"book/pkg/helper"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 
 	"context"
 	"database/sql"
@@ -25,6 +27,12 @@ func NewBookRepo(db *pgxpool.Pool) *BookRepo {
 }
 
 func (u *BookRepo) Create(ctx context.Context, req *book_service.CreateBook) (resp *book_service.BookPK, err error) {
+
+	bookInfo, err := u.fetchBookInfo(req.Isbn)
+    if err != nil {
+        return nil, err
+    }
+
 	id := uuid.New().String()
 
 	query := `
@@ -46,13 +54,13 @@ func (u *BookRepo) Create(ctx context.Context, req *book_service.CreateBook) (re
 		ctx,
 		query,
 		id,
-		req.Isbn,
-		req.Title,
-		req.Cover,
-		req.Author,
-		req.Published,
-		req.Pages,
-		req.Status,
+		bookInfo.Isbn,
+		bookInfo.Title,
+		bookInfo.Cover,
+		bookInfo.Author,
+		bookInfo.Published,
+		bookInfo.Pages,
+		bookInfo.Status,
 	)
 	if err != nil {
 		return nil, err
@@ -125,20 +133,20 @@ func (u *BookRepo) GetByPKey(ctx context.Context, req *book_service.BookPK) (Boo
 
 func (u *BookRepo) GetBookByTitle(ctx context.Context, req *book_service.BookByTitle) (Book *book_service.Book, err error) {
 	query := `
-		SELECT
-			"id",
-			"isbn",
-			"title",
-			"cover",
-			"author",
-			"published",
-			"pages",
-			"status",
-			"created_at",
-			"updated_at"
+			SELECT
+		    "id",
+		    "isbn",
+		    "title",
+		    "cover",
+		    "author",
+		    "published",
+		    "pages",
+		    "status",
+		    "created_at",
+		    "updated_at"
 		FROM "book"
 		WHERE "title" ILIKE '%' || $1 || '%'
-		LIMIT 1
+		LIMIT 1;
 	`
 
 	row := u.db.QueryRow(ctx, query, req.Title)
@@ -368,4 +376,25 @@ func (u *BookRepo) Delete(ctx context.Context, req *book_service.BookPK) error {
 	}
 
 	return nil
+}
+
+func (u *BookRepo) fetchBookInfo(isbn string) (*book_service.Book, error) {
+	apiUrl := "https://openlibrary.org/api/books"
+	response, err := http.Get(apiUrl + "?bibkeys=ISBN:" + isbn + "&format=json")
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	var bookData map[string]book_service.Book
+	if err := json.NewDecoder(response.Body).Decode(&bookData); err != nil {
+		return nil, err
+	}
+
+	bookInfo, found := bookData["ISBN:"+isbn]
+	if !found {
+		return nil, errors.New("Book information not found")
+	}
+
+	return &bookInfo, nil
 }
