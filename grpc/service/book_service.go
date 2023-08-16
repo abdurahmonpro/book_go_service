@@ -66,11 +66,11 @@ func (i *BookService) GetByID(ctx context.Context, req *book_service.BookPK) (re
 
 func (i *BookService) GetBookByTitle(ctx context.Context, req *book_service.BookByTitle) (resp *book_service.Book, err error) {
 
-	i.log.Info("---GetBookByID------>", logger.Any("req", req))
+	i.log.Info("---GetBookByTitle------>", logger.Any("req", req))
 
 	resp, err = i.strg.Book().GetBookByTitle(ctx, req)
 	if err != nil {
-		i.log.Error("!!!GetBookByID->Book->Get--->", logger.Error(err))
+		i.log.Error("!!!GetBookByTitle->Book->Get--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
