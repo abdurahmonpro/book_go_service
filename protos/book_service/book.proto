@@ -13,15 +13,13 @@ message Book {
     string published = 6;
     int32 pages = 7;
     int32 status = 8; // 0-new, 1-reading, 2-finished,
-    string created_at = 9;
-    string updated_at = 10;
 }
 
-message CreateBookResponse {
+message BookResponse {
     repeated BookData data = 1;
     bool is_ok = 2;
     string message = 3;
-}
+  }
 
 message BookData {
     Book book = 1;
@@ -45,7 +43,7 @@ message UpdateBook {
 
 message UpdatePatchBook {
     string id = 1;
-    google.protobuf.Struct fields = 2;
+    int32 status = 2;
 }
 
 message BookPK {
@@ -63,6 +61,6 @@ message BookListRequest{
 }
 
 message BookListResponse {
-    int32 count = 1;
+    int64 count = 1;
     repeated Book books = 2;
 }

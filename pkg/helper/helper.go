@@ -1,9 +1,12 @@
 package helper
 
 import (
+	"book/genproto/book_service"
 	"crypto/rand"
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -112,4 +115,54 @@ func NewNullBool(s bool) sql.NullBool {
 		Bool:  s,
 		Valid: true,
 	}
+}
+
+const apiBaseURL = "https://openlibrary.org/api/books"
+func GetBookByISBN(isbn string) (*book_service.Book, error) {
+	url := fmt.Sprintf("%s?bibkeys=ISBN:%s&jscmd=data&format=json", apiBaseURL, isbn)
+
+	response, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	var data map[string]interface{}
+	err = json.NewDecoder(response.Body).Decode(&data)
+	if err != nil {
+		return nil, err
+	}
+
+	apiResponse, exists := data["ISBN:"+isbn].(map[string]interface{})
+	if !exists {
+		return nil, fmt.Errorf("Book with ISBN %s not found", isbn)
+	}
+
+	coverURL := fmt.Sprintf("https://covers.openlibrary.org/b/id/%s-L.jpg", strings.Replace(isbn, "-", "", -1))
+
+	book := &book_service.Book{
+		Id:        isbn,
+		Isbn:      isbn,
+		Title:     apiResponse["title"].(string),
+		Cover:     coverURL,
+		Author:    "",
+		Published: "",
+		Pages:     0,
+	}
+
+	authors := apiResponse["authors"].([]interface{})
+	if len(authors) > 0 {
+		authorMap := authors[0].(map[string]interface{})
+		book.Author = authorMap["name"].(string)
+	}
+
+	if publishDate, ok := apiResponse["publish_date"].(string); ok {
+		book.Published = publishDate
+	}
+
+	if numPages, ok := apiResponse["number_of_pages"].(float64); ok {
+		book.Pages = int32(numPages)
+	}
+
+	return book, nil
 }

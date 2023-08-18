@@ -4,10 +4,7 @@ import (
 	"book/genproto/book_service"
 	"book/models"
 	"book/pkg/helper"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"net/http"
 
 	"context"
 	"database/sql"
@@ -25,31 +22,29 @@ func NewBookRepo(db *pgxpool.Pool) *BookRepo {
 		db: db,
 	}
 }
+func (u *BookRepo) Create(ctx context.Context, req *book_service.CreateBook) (*book_service.BookPK, error) {
 
-func (u *BookRepo) Create(ctx context.Context, req *book_service.CreateBook) (resp *book_service.BookPK, err error) {
-
-	bookInfo, err := u.fetchBookInfo(req.Isbn)
-    if err != nil {
-        return nil, err
-    }
+	bookInfo, err := helper.GetBookByISBN(req.Isbn)
+	if err != nil {
+		fmt.Println("error from api")
+		return nil, err
+	}
 
 	id := uuid.New().String()
-
 	query := `
-		INSERT INTO "book" (
-			"id",
-			"isbn",
-			"title",
-			"cover",
-			"author",
-			"published",
-			"pages",
-			"status",
-			"created_at",
-			"updated_at"
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
-	`
-
+        INSERT INTO "book" (
+            "id",
+            "isbn",
+            "title",
+            "cover",
+            "author",
+            "published",
+            "pages",
+            "status",
+            "created_at",
+            "updated_at"
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+    `
 	_, err = u.db.Exec(
 		ctx,
 		query,
@@ -79,9 +74,7 @@ func (u *BookRepo) GetByPKey(ctx context.Context, req *book_service.BookPK) (Boo
 			"author",
 			"published",
 			"pages",
-			"status",
-			"created_at",
-			"updated_at"
+			"status"
 		FROM "book"
 		WHERE "id" = $1
 	`
@@ -95,8 +88,6 @@ func (u *BookRepo) GetByPKey(ctx context.Context, req *book_service.BookPK) (Boo
 		published sql.NullString
 		pages     sql.NullInt32
 		status    sql.NullInt32
-		created   sql.NullString
-		updated   sql.NullString
 	)
 
 	err = u.db.QueryRow(ctx, query, req.Id).Scan(
@@ -108,8 +99,6 @@ func (u *BookRepo) GetByPKey(ctx context.Context, req *book_service.BookPK) (Boo
 		&published,
 		&pages,
 		&status,
-		&created,
-		&updated,
 	)
 	if err != nil {
 		return Book, err
@@ -124,8 +113,6 @@ func (u *BookRepo) GetByPKey(ctx context.Context, req *book_service.BookPK) (Boo
 		Published: published.String,
 		Pages:     int32(pages.Int32),
 		Status:    int32(status.Int32),
-		CreatedAt: created.String,
-		UpdatedAt: updated.String,
 	}
 
 	return
@@ -141,9 +128,7 @@ func (u *BookRepo) GetBookByTitle(ctx context.Context, req *book_service.BookByT
 		    "author",
 		    "published",
 		    "pages",
-		    "status",
-		    "created_at",
-		    "updated_at"
+		    "status"
 		FROM "book"
 		WHERE "title" ILIKE '%' || $1 || '%'
 		LIMIT 1;
@@ -160,8 +145,6 @@ func (u *BookRepo) GetBookByTitle(ctx context.Context, req *book_service.BookByT
 		published sql.NullString
 		pages     sql.NullInt32
 		status    sql.NullInt32
-		created   sql.NullString
-		updated   sql.NullString
 	)
 
 	err = row.Scan(
@@ -173,8 +156,6 @@ func (u *BookRepo) GetBookByTitle(ctx context.Context, req *book_service.BookByT
 		&published,
 		&pages,
 		&status,
-		&created,
-		&updated,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -192,8 +173,6 @@ func (u *BookRepo) GetBookByTitle(ctx context.Context, req *book_service.BookByT
 		Published: published.String,
 		Pages:     int32(pages.Int32),
 		Status:    int32(status.Int32),
-		CreatedAt: created.String,
-		UpdatedAt: updated.String,
 	}
 
 	return
@@ -215,20 +194,17 @@ func (u *BookRepo) GetAll(ctx context.Context, req *book_service.BookListRequest
 		SELECT
 			COUNT(*) OVER(),
 			"id",
-			"isbn",
-			"title",
-			"cover",
-			"author",
-			"published",
-			"pages",
-			"status",
-			TO_CHAR(created_at, 'YYYY-MM-DD HH24:MI:SS'),
-			TO_CHAR(updated_at, 'YYYY-MM-DD HH24:MI:SS')
+		    "isbn",
+		    "title",
+		    "cover",
+		    "author",
+		    "published",
+		    "pages",
+		    "status"
 		FROM "book"
 	`
-
 	if len(req.GetSearch()) > 0 {
-		filter += " AND (title || ' ' || author) ILIKE '%' || '" + req.Search + "' || '%' "
+		filter += " AND (title || ' ' || isbn) ILIKE '%' || '" + req.Search + "' || '%' "
 	}
 	if req.GetLimit() > 0 {
 		limit = " LIMIT :limit"
@@ -238,7 +214,6 @@ func (u *BookRepo) GetAll(ctx context.Context, req *book_service.BookListRequest
 		offset = " OFFSET :offset"
 		params["offset"] = req.Offset
 	}
-
 	query += filter + sort + offset + limit
 
 	query, args := helper.ReplaceQueryParams(query, params)
@@ -258,8 +233,6 @@ func (u *BookRepo) GetAll(ctx context.Context, req *book_service.BookListRequest
 			published sql.NullString
 			pages     sql.NullInt32
 			status    sql.NullInt32
-			created   sql.NullString
-			updated   sql.NullString
 		)
 
 		err := rows.Scan(
@@ -272,8 +245,6 @@ func (u *BookRepo) GetAll(ctx context.Context, req *book_service.BookListRequest
 			&published,
 			&pages,
 			&status,
-			&created,
-			&updated,
 		)
 		if err != nil {
 			return resp, err
@@ -288,12 +259,10 @@ func (u *BookRepo) GetAll(ctx context.Context, req *book_service.BookListRequest
 			Published: published.String,
 			Pages:     int32(pages.Int32),
 			Status:    int32(status.Int32),
-			CreatedAt: created.String,
-			UpdatedAt: updated.String,
 		})
 	}
 
-	return resp, nil
+	return
 }
 
 func (u *BookRepo) Update(ctx context.Context, req *book_service.UpdateBook) (rowsAffected int64, err error) {
@@ -327,39 +296,24 @@ func (u *BookRepo) Update(ctx context.Context, req *book_service.UpdateBook) (ro
 }
 
 func (u *BookRepo) UpdatePatch(ctx context.Context, req *models.UpdatePatchRequest) (rowsAffected int64, err error) {
-
-	var (
-		set   = " SET "
-		ind   = 0
-		query string
-	)
-
-	if len(req.Fields) == 0 {
-		err = errors.New("no updates provided")
-		return
-	}
-
-	req.Fields["id"] = req.Id
-
-	for key := range req.Fields {
-		set += fmt.Sprintf(" %s = :%s ", key, key)
-		if ind != len(req.Fields)-1 {
-			set += ", "
-		}
-		ind++
-	}
-
-	query = `
+	query := `
 		UPDATE
 			"book"
-	` + set + ` , updated_at = now()
+		SET
+			status = :status,
+			updated_at = now()
 		WHERE
 			id = :id
 	`
 
-	query, args := helper.ReplaceQueryParams(query, req.Fields)
+	args := map[string]interface{}{
+		"id":     req.Id,
+		"status": req.Status,
+	}
 
-	result, err := u.db.Exec(ctx, query, args...)
+	query, namedArgs := helper.ReplaceQueryParams(query, args)
+
+	result, err := u.db.Exec(ctx, query, namedArgs...)
 	if err != nil {
 		return
 	}
@@ -376,25 +330,4 @@ func (u *BookRepo) Delete(ctx context.Context, req *book_service.BookPK) error {
 	}
 
 	return nil
-}
-
-func (u *BookRepo) fetchBookInfo(isbn string) (*book_service.Book, error) {
-	apiUrl := "https://openlibrary.org/api/books"
-	response, err := http.Get(apiUrl + "?bibkeys=ISBN:" + isbn + "&format=json")
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	var bookData map[string]book_service.Book
-	if err := json.NewDecoder(response.Body).Decode(&bookData); err != nil {
-		return nil, err
-	}
-
-	bookInfo, found := bookData["ISBN:"+isbn]
-	if !found {
-		return nil, errors.New("Book information not found")
-	}
-
-	return &bookInfo, nil
 }
