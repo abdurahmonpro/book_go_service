@@ -36,7 +36,7 @@ type Config struct {
 	DefaultOffset string
 	DefaultLimit  string
 
-	SecretKey string
+	SecretKey  string
 
 	PasscodePool   string
 	PasscodeLength int
