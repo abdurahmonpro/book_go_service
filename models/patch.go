@@ -1,6 +1,6 @@
 package models
 
 type UpdatePatchRequest struct {
-	Id     string                 `json:"id"`
+	Id     int32                 `json:"id"`
 	Status int32					  `json:"status"`
 }

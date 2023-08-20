@@ -9,7 +9,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -30,25 +29,25 @@ func (u *BookRepo) Create(ctx context.Context, req *book_service.CreateBook) (*b
 		return nil, err
 	}
 
-	id := uuid.New().String()
 	query := `
-        INSERT INTO "book" (
-            "id",
-            "isbn",
-            "title",
-            "cover",
-            "author",
-            "published",
-            "pages",
-            "status",
-            "created_at",
-            "updated_at"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
-    `
-	_, err = u.db.Exec(
+		INSERT INTO "user" (
+			"isbn",
+			"title",
+			"cover",
+			"author",
+			"published",
+			"pages",
+			"status"
+			"created_at",
+			"updated_at"
+		) VALUES ($1, $2, $3, $4, NOW(), NOW())
+		RETURNING id
+`
+
+	var id int
+	err = u.db.QueryRow(
 		ctx,
 		query,
-		id,
 		bookInfo.Isbn,
 		bookInfo.Title,
 		bookInfo.Cover,
@@ -56,12 +55,12 @@ func (u *BookRepo) Create(ctx context.Context, req *book_service.CreateBook) (*b
 		bookInfo.Published,
 		bookInfo.Pages,
 		bookInfo.Status,
-	)
+	).Scan(&id)
 	if err != nil {
 		return nil, err
 	}
 
-	return &book_service.BookPK{Id: id}, nil
+	return &book_service.BookPK{Id: int32(id)}, nil
 }
 
 func (u *BookRepo) GetByPKey(ctx context.Context, req *book_service.BookPK) (Book *book_service.Book, err error) {
@@ -80,7 +79,7 @@ func (u *BookRepo) GetByPKey(ctx context.Context, req *book_service.BookPK) (Boo
 	`
 
 	var (
-		id        sql.NullString
+		id        sql.NullInt32
 		isbn      sql.NullString
 		title     sql.NullString
 		cover     sql.NullString
@@ -105,7 +104,7 @@ func (u *BookRepo) GetByPKey(ctx context.Context, req *book_service.BookPK) (Boo
 	}
 
 	Book = &book_service.Book{
-		Id:        id.String,
+		Id:        id.Int32,
 		Isbn:      isbn.String,
 		Title:     title.String,
 		Cover:     cover.String,
@@ -137,7 +136,7 @@ func (u *BookRepo) GetBookByTitle(ctx context.Context, req *book_service.BookByT
 	row := u.db.QueryRow(ctx, query, req.Title)
 
 	var (
-		id        sql.NullString
+		id        sql.NullInt32
 		isbn      sql.NullString
 		title     sql.NullString
 		cover     sql.NullString
@@ -165,7 +164,7 @@ func (u *BookRepo) GetBookByTitle(ctx context.Context, req *book_service.BookByT
 	}
 
 	Book = &book_service.Book{
-		Id:        id.String,
+		Id:        id.Int32,
 		Isbn:      isbn.String,
 		Title:     title.String,
 		Cover:     cover.String,
@@ -225,7 +224,7 @@ func (u *BookRepo) GetAll(ctx context.Context, req *book_service.BookListRequest
 
 	for rows.Next() {
 		var (
-			id        sql.NullString
+			id        sql.NullInt32
 			isbn      sql.NullString
 			title     sql.NullString
 			cover     sql.NullString
@@ -251,7 +250,7 @@ func (u *BookRepo) GetAll(ctx context.Context, req *book_service.BookListRequest
 		}
 
 		resp.Books = append(resp.Books, &book_service.Book{
-			Id:        id.String,
+			Id:        id.Int32,
 			Isbn:      isbn.String,
 			Title:     title.String,
 			Cover:     cover.String,

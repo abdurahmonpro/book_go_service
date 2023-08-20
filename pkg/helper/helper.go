@@ -118,6 +118,7 @@ func NewNullBool(s bool) sql.NullBool {
 }
 
 const apiBaseURL = "https://openlibrary.org/api/books"
+
 func GetBookByISBN(isbn string) (*book_service.Book, error) {
 	url := fmt.Sprintf("%s?bibkeys=ISBN:%s&jscmd=data&format=json", apiBaseURL, isbn)
 
@@ -141,7 +142,6 @@ func GetBookByISBN(isbn string) (*book_service.Book, error) {
 	coverURL := fmt.Sprintf("https://covers.openlibrary.org/b/id/%s-L.jpg", strings.Replace(isbn, "-", "", -1))
 
 	book := &book_service.Book{
-		Id:        isbn,
 		Isbn:      isbn,
 		Title:     apiResponse["title"].(string),
 		Cover:     coverURL,

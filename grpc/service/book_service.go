@@ -7,7 +7,6 @@ import (
 	"book/models"
 	"book/pkg/logger"
 	"book/storage"
-	"errors"
 
 	"context"
 
@@ -35,19 +34,8 @@ func NewBookService(cfg config.Config, log logger.LoggerI, strg storage.StorageI
 func (i *BookService) Create(ctx context.Context, req *book_service.CreateBook) (*book_service.BookResponse, error) {
 	i.log.Info("---CreateBook------>", logger.Any("req", req))
 
-	var ErrBookNotFound = errors.New("book not found")
-
 	bookpk, err := i.strg.Book().Create(ctx, req)
 	if err != nil {
-		if errors.Is(err, ErrBookNotFound) {
-			response := &book_service.BookResponse{
-				Data:    []*book_service.BookData{},
-				IsOk:    true,
-				Message: "book not found",
-			}
-			return response, nil
-		}
-
 		i.log.Error("!!!CreateBook->Book->Create--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -196,7 +184,7 @@ func (i *BookService) UpdatePatch(ctx context.Context, req *book_service.UpdateP
 		Message: "ok",
 	}
 
-	return 
+	return
 }
 
 func (i *BookService) Delete(ctx context.Context, req *book_service.BookPK) (resp *book_service.BookResponse, err error) {

@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS "book" (
-    "id" UUID PRIMARY KEY,
+    "id" SERIAL PRIMARY KEY,
     "isbn" VARCHAR(30) NOT NULL,
     "title" VARCHAR(100) NOT NULL,
     "cover" TEXT NOT NULL UNIQUE,
