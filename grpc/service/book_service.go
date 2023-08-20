@@ -76,7 +76,7 @@ func (i *BookService) GetBookByTitle(ctx context.Context, req *book_service.Book
 
 	book, err := i.strg.Book().GetBookByTitle(ctx, req)
 	if err != nil {
-		i.log.Error("!!!GetBookByTitle->Book->Get--->", logger.Error(err))
+		i.log.Error("!!!Get BookByTitle->Book->Get--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
