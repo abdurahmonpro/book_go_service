@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS "book" (
     "author" VARCHAR(50) NOT NULL,
     "published" VARCHAR(30) NOT NULL,
     "pages" INTEGER NOT NULL,
-    -- 0 new, 1 reading, 2 finished
+    -- 0 new, 1 reading,  2 finished
     "status" SMALLINT NOT NULL DEFAULT 0,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP
