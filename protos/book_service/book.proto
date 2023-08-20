@@ -21,6 +21,12 @@ message BookResponse {
     string message = 3;
   }
 
+  message BookResponseByItem {
+    repeated Book data = 1;
+    bool isOk = 2;
+    string message = 3;
+  }
+
   message OneBookResponse {
     BookData data = 1;
     bool isOk = 2;

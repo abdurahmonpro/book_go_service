@@ -38,7 +38,7 @@ type BookServiceClient interface {
 	Update(ctx context.Context, in *UpdateBook, opts ...grpc.CallOption) (*Book, error)
 	UpdatePatch(ctx context.Context, in *UpdatePatchBook, opts ...grpc.CallOption) (*BookResponse, error)
 	Delete(ctx context.Context, in *BookPK, opts ...grpc.CallOption) (*BookResponse, error)
-	GetBookByTitle(ctx context.Context, in *BookByTitle, opts ...grpc.CallOption) (*OneBookResponse, error)
+	GetBookByTitle(ctx context.Context, in *BookByTitle, opts ...grpc.CallOption) (*BookResponseByItem, error)
 }
 
 type bookServiceClient struct {
@@ -103,8 +103,8 @@ func (c *bookServiceClient) Delete(ctx context.Context, in *BookPK, opts ...grpc
 	return out, nil
 }
 
-func (c *bookServiceClient) GetBookByTitle(ctx context.Context, in *BookByTitle, opts ...grpc.CallOption) (*OneBookResponse, error) {
-	out := new(OneBookResponse)
+func (c *bookServiceClient) GetBookByTitle(ctx context.Context, in *BookByTitle, opts ...grpc.CallOption) (*BookResponseByItem, error) {
+	out := new(BookResponseByItem)
 	err := c.cc.Invoke(ctx, BookService_GetBookByTitle_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -122,7 +122,7 @@ type BookServiceServer interface {
 	Update(context.Context, *UpdateBook) (*Book, error)
 	UpdatePatch(context.Context, *UpdatePatchBook) (*BookResponse, error)
 	Delete(context.Context, *BookPK) (*BookResponse, error)
-	GetBookByTitle(context.Context, *BookByTitle) (*OneBookResponse, error)
+	GetBookByTitle(context.Context, *BookByTitle) (*BookResponseByItem, error)
 	mustEmbedUnimplementedBookServiceServer()
 }
 
@@ -148,7 +148,7 @@ func (UnimplementedBookServiceServer) UpdatePatch(context.Context, *UpdatePatchB
 func (UnimplementedBookServiceServer) Delete(context.Context, *BookPK) (*BookResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedBookServiceServer) GetBookByTitle(context.Context, *BookByTitle) (*OneBookResponse, error) {
+func (UnimplementedBookServiceServer) GetBookByTitle(context.Context, *BookByTitle) (*BookResponseByItem, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBookByTitle not implemented")
 }
 func (UnimplementedBookServiceServer) mustEmbedUnimplementedBookServiceServer() {}
