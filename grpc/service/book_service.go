@@ -195,6 +195,7 @@ func (i *BookService) Delete(ctx context.Context, req *book_service.BookPK) (res
 		fmt.Println("************************************************************************")
 		fmt.Println("************************************************************************")
 		fmt.Println("************************************************************************")
+		fmt.Println("************************************************************************")
 		i.log.Error("!!!DeleteBook->Book->Get--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
