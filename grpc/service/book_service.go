@@ -71,7 +71,7 @@ func (i *BookService) GetByID(ctx context.Context, req *book_service.BookPK) (re
 	return
 }
 
-func (i *BookService) GetBookByTitle(ctx context.Context, req *book_service.BookByTitle) (*book_service.BookResponse, error) {
+func (i *BookService) GetBookByTitle(ctx context.Context, req *book_service.BookByTitle) (*book_service.OneBookResponse, error) {
 	i.log.Info("---GetBookByTitle------>", logger.Any("req", req))
 
 	book, err := i.strg.Book().GetBookByTitle(ctx, req)
@@ -85,8 +85,8 @@ func (i *BookService) GetBookByTitle(ctx context.Context, req *book_service.Book
 		Status: book.Status,
 	}
 
-	response := &book_service.BookResponse{
-		Data:    []*book_service.BookData{bookData},
+	response := &book_service.OneBookResponse{
+		Data:    bookData,
 		IsOk:    true,
 		Message: "ok",
 	}
