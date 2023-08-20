@@ -13,7 +13,7 @@ type StorageI interface {
 }
 
 type BookRepoI interface {
-	Create(ctx context.Context, req *book_service.CreateBook) (*book_service.BookPK, error)
+	Create(ctx context.Context,  req *book_service.CreateBook) (*book_service.BookPK, error)
 	GetByPKey(context.Context, *book_service.BookPK) (*book_service.Book, error)
 	GetAll(context.Context, *book_service.BookListRequest) (*book_service.BookListResponse, error)
 	Update(context.Context, *book_service.UpdateBook) (int64, error)
