@@ -7,7 +7,6 @@ import (
 	"book/models"
 	"book/pkg/logger"
 	"book/storage"
-	"fmt"
 
 	"context"
 
@@ -192,10 +191,6 @@ func (i *BookService) Delete(ctx context.Context, req *book_service.BookPK) (res
 
 	err = i.strg.Book().Delete(ctx, req)
 	if err != nil {
-		fmt.Println("************************************************************************")
-		fmt.Println("************************************************************************")
-		fmt.Println("************************************************************************")
-		fmt.Println("************************************************************************")
 		i.log.Error("!!!DeleteBook->Book->Get--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
