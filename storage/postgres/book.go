@@ -37,7 +37,7 @@ func (u *BookRepo) Create(ctx context.Context, req *book_service.CreateBook) (*b
 			"author",
 			"published",
 			"pages",
-			"status"
+			"status",
 			"created_at",
 			"updated_at"
 		) VALUES ($1, $2, $3, $4, NOW(), NOW())
