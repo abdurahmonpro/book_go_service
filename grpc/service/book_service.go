@@ -31,7 +31,7 @@ func NewBookService(cfg config.Config, log logger.LoggerI, strg storage.StorageI
 	}
 }
 
-func (i *BookService) Create(ctx context.Context, req *book_service.CreateBook) (*book_service.BookResponse, error) {
+func (i *BookService) Create(ctx context.Context, req *book_service.CreateBook) (*book_service.OneBookResponse, error) {
 	i.log.Info("---CreateBook------>", logger.Any("req", req))
 
 	bookpk, err := i.strg.Book().Create(ctx, req)
@@ -46,12 +46,10 @@ func (i *BookService) Create(ctx context.Context, req *book_service.CreateBook) 
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	response := &book_service.BookResponse{
-		Data: []*book_service.BookData{
-			{
-				Book:   respons,
-				Status: respons.Status,
-			},
+	response := &book_service.OneBookResponse{
+		Data: &book_service.BookData{
+			Book:   respons,
+			Status: respons.Status,
 		},
 		IsOk:    true,
 		Message: "ok",

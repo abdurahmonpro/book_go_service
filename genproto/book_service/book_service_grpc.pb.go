@@ -32,7 +32,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BookServiceClient interface {
-	Create(ctx context.Context, in *CreateBook, opts ...grpc.CallOption) (*BookResponse, error)
+	Create(ctx context.Context, in *CreateBook, opts ...grpc.CallOption) (*OneBookResponse, error)
 	GetByID(ctx context.Context, in *BookPK, opts ...grpc.CallOption) (*Book, error)
 	GetList(ctx context.Context, in *BookListRequest, opts ...grpc.CallOption) (*BookResponse, error)
 	Update(ctx context.Context, in *UpdateBook, opts ...grpc.CallOption) (*Book, error)
@@ -49,8 +49,8 @@ func NewBookServiceClient(cc grpc.ClientConnInterface) BookServiceClient {
 	return &bookServiceClient{cc}
 }
 
-func (c *bookServiceClient) Create(ctx context.Context, in *CreateBook, opts ...grpc.CallOption) (*BookResponse, error) {
-	out := new(BookResponse)
+func (c *bookServiceClient) Create(ctx context.Context, in *CreateBook, opts ...grpc.CallOption) (*OneBookResponse, error) {
+	out := new(OneBookResponse)
 	err := c.cc.Invoke(ctx, BookService_Create_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -116,7 +116,7 @@ func (c *bookServiceClient) GetBookByTitle(ctx context.Context, in *BookByTitle,
 // All implementations must embed UnimplementedBookServiceServer
 // for forward compatibility
 type BookServiceServer interface {
-	Create(context.Context, *CreateBook) (*BookResponse, error)
+	Create(context.Context, *CreateBook) (*OneBookResponse, error)
 	GetByID(context.Context, *BookPK) (*Book, error)
 	GetList(context.Context, *BookListRequest) (*BookResponse, error)
 	Update(context.Context, *UpdateBook) (*Book, error)
@@ -130,7 +130,7 @@ type BookServiceServer interface {
 type UnimplementedBookServiceServer struct {
 }
 
-func (UnimplementedBookServiceServer) Create(context.Context, *CreateBook) (*BookResponse, error) {
+func (UnimplementedBookServiceServer) Create(context.Context, *CreateBook) (*OneBookResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
 func (UnimplementedBookServiceServer) GetByID(context.Context, *BookPK) (*Book, error) {
