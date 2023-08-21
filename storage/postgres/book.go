@@ -308,7 +308,7 @@ func (u *BookRepo) UpdatePatch(ctx context.Context, req *models.UpdatePatchReque
 
 	args := map[string]interface{}{
 		"id":     req.Id,
-		"status": req.Updpatch.Status,
+		"status": &req.Updpatch.Status,
 	}
 
 	query, namedArgs := helper.ReplaceQueryParams(query, args)
