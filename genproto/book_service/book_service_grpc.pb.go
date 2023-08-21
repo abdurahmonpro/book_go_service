@@ -36,7 +36,7 @@ type BookServiceClient interface {
 	GetByID(ctx context.Context, in *BookPK, opts ...grpc.CallOption) (*Book, error)
 	GetList(ctx context.Context, in *BookListRequest, opts ...grpc.CallOption) (*BookResponse, error)
 	Update(ctx context.Context, in *UpdateBook, opts ...grpc.CallOption) (*Book, error)
-	UpdatePatch(ctx context.Context, in *UpdatePatchBook, opts ...grpc.CallOption) (*BookResponse, error)
+	UpdatePatch(ctx context.Context, in *UpdatePatchBook, opts ...grpc.CallOption) (*OneBookResponse, error)
 	Delete(ctx context.Context, in *BookPK, opts ...grpc.CallOption) (*BookResponse, error)
 	GetBookByTitle(ctx context.Context, in *BookByTitle, opts ...grpc.CallOption) (*BookResponseByItem, error)
 }
@@ -85,8 +85,8 @@ func (c *bookServiceClient) Update(ctx context.Context, in *UpdateBook, opts ...
 	return out, nil
 }
 
-func (c *bookServiceClient) UpdatePatch(ctx context.Context, in *UpdatePatchBook, opts ...grpc.CallOption) (*BookResponse, error) {
-	out := new(BookResponse)
+func (c *bookServiceClient) UpdatePatch(ctx context.Context, in *UpdatePatchBook, opts ...grpc.CallOption) (*OneBookResponse, error) {
+	out := new(OneBookResponse)
 	err := c.cc.Invoke(ctx, BookService_UpdatePatch_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -120,7 +120,7 @@ type BookServiceServer interface {
 	GetByID(context.Context, *BookPK) (*Book, error)
 	GetList(context.Context, *BookListRequest) (*BookResponse, error)
 	Update(context.Context, *UpdateBook) (*Book, error)
-	UpdatePatch(context.Context, *UpdatePatchBook) (*BookResponse, error)
+	UpdatePatch(context.Context, *UpdatePatchBook) (*OneBookResponse, error)
 	Delete(context.Context, *BookPK) (*BookResponse, error)
 	GetBookByTitle(context.Context, *BookByTitle) (*BookResponseByItem, error)
 	mustEmbedUnimplementedBookServiceServer()
@@ -142,7 +142,7 @@ func (UnimplementedBookServiceServer) GetList(context.Context, *BookListRequest)
 func (UnimplementedBookServiceServer) Update(context.Context, *UpdateBook) (*Book, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (UnimplementedBookServiceServer) UpdatePatch(context.Context, *UpdatePatchBook) (*BookResponse, error) {
+func (UnimplementedBookServiceServer) UpdatePatch(context.Context, *UpdatePatchBook) (*OneBookResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePatch not implemented")
 }
 func (UnimplementedBookServiceServer) Delete(context.Context, *BookPK) (*BookResponse, error) {

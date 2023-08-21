@@ -55,7 +55,7 @@ message UpdateBook {
 
 message UpdatePatchBook {
     int32 id = 1;
-    int32 status = 2;
+    BookData updpatch = 2;
 }
 
 message BookPK {

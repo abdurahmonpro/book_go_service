@@ -140,13 +140,13 @@ func (i *BookService) Update(ctx context.Context, req *book_service.UpdateBook) 
 	return resp, err
 }
 
-func (i *BookService) UpdatePatch(ctx context.Context, req *book_service.UpdatePatchBook) (resp *book_service.BookResponse, err error) {
+func (i *BookService) UpdatePatch(ctx context.Context, req *book_service.UpdatePatchBook) (resp *book_service.OneBookResponse, err error) {
 
 	i.log.Info("---UpdatePatchBook------>", logger.Any("req", req))
 
 	updatePatchModel := models.UpdatePatchRequest{
-		Id:     req.GetId(),
-		Status: req.GetStatus(),
+		Id:       req.GetId(),
+		Updpatch: *req.GetUpdpatch(),
 	}
 
 	rowsAffected, err := i.strg.Book().UpdatePatch(ctx, &updatePatchModel)
@@ -166,12 +166,10 @@ func (i *BookService) UpdatePatch(ctx context.Context, req *book_service.UpdateP
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	resp = &book_service.BookResponse{
-		Data: []*book_service.BookData{
-			{
-				Book:   respons,
-				Status: respons.Status,
-			},
+	resp = &book_service.OneBookResponse{
+		Data: &book_service.BookData{
+			Book:   respons,
+			Status: respons.Status,
 		},
 		IsOk:    true,
 		Message: "ok",

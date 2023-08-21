@@ -13,7 +13,7 @@ service BookService {
     rpc GetByID(BookPK) returns (Book) {};
     rpc GetList(BookListRequest) returns (BookResponse) {};
     rpc Update(UpdateBook) returns (Book) {};
-    rpc UpdatePatch(UpdatePatchBook) returns (BookResponse) {};
+    rpc UpdatePatch(UpdatePatchBook) returns (OneBookResponse) {};
     rpc Delete(BookPK) returns (BookResponse) {};
     rpc GetBookByTitle(BookByTitle) returns (BookResponseByItem) {};
 }
