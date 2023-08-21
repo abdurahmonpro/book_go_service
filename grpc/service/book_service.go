@@ -150,7 +150,6 @@ func (i *BookService) UpdatePatch(ctx context.Context, req *book_service.UpdateP
 	}
 
 	rowsAffected, err := i.strg.Book().UpdatePatch(ctx, &updatePatchModel)
-
 	if err != nil {
 		i.log.Error("!!!UpdatePatchBook--->", logger.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
