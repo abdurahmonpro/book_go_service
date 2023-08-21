@@ -293,36 +293,33 @@ func (u *BookRepo) Update(ctx context.Context, req *book_service.UpdateBook) (ro
 
 	return result.RowsAffected(), nil
 }
+
 func (u *BookRepo) UpdatePatch(ctx context.Context, req *models.UpdatePatchRequest) (rowsAffected int64, err error) {
 	query := `
 		UPDATE
 			"book"
 		SET
-			status = $1,
-			updated_at = now()
+			status = :status
 		WHERE
-			id = $2
+			id = :id
 	`
 
-	args := []interface{}{
-		req.Updpatch.Status,
-		req.Id,
+	args := map[string]interface{}{
+		"id":     req.Id,
+		"status": req.Updpatch.Status,
 	}
 
-	fmt.Println(query)
-	fmt.Println(args...)
+	query, namedArgs := helper.ReplaceQueryParams(query, args)
 
-	result, err := u.db.Exec(ctx, query, args...)
+	fmt.Print(query)
+	fmt.Print(namedArgs...)
+	
+	result, err := u.db.Exec(ctx, query, namedArgs...)
 	if err != nil {
-		return 0, err
+		return
 	}
 
-	affectedRows := result.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-
-	return affectedRows, nil
+	return result.RowsAffected(), err
 }
 
 func (u *BookRepo) Delete(ctx context.Context, req *book_service.BookPK) error {
