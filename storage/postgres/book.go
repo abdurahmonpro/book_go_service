@@ -312,7 +312,7 @@ func (u *BookRepo) UpdatePatch(ctx context.Context, req *models.UpdatePatchReque
 
 	query, namedArgs := helper.ReplaceQueryParams(query, args)
 	fmt.Println(query)
-
+	fmt.Println(namedArgs...)
 	result, err := u.db.Exec(ctx, query, namedArgs...)
 	if err != nil {
 		return
