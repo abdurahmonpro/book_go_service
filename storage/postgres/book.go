@@ -304,6 +304,8 @@ func (u *BookRepo) UpdatePatch(ctx context.Context, req *models.UpdatePatchReque
 			id = :id
 	`
 
+	fmt.Println(req)
+
 	args := map[string]interface{}{
 		"id":     req.Id,
 		"status": req.Updpatch.Status,
@@ -313,7 +315,7 @@ func (u *BookRepo) UpdatePatch(ctx context.Context, req *models.UpdatePatchReque
 
 	fmt.Print(query)
 	fmt.Print(namedArgs...)
-	
+
 	result, err := u.db.Exec(ctx, query, namedArgs...)
 	if err != nil {
 		return
